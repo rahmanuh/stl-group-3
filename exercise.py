@@ -52,13 +52,13 @@ class CraneMonitor(object):
         # Exercise 1.1: Operation domain: Position bounds checking: Postion should never be smaller than 0.0
         # or larger than 0.45; Same as, always has to be in range [0.0, 0.45].
         # TODO: Create lambda function for position bounds [0.0, 0.45]
-        #self.x_within_min = lambda lst: [(t, #do something to ) for (t, x) in lst]
-        #self.x_within_max = lambda lst:  # Your code here
+        self.x_within_min = lambda lst: [(t, x >= 0.0 ) for (t, x) in lst]
+        self.x_within_max = lambda lst: [(t, x <= 0.45 ) for (t, x) in lst]
 
         # Exercise 1.2: Write STL formula for position bounds
         # TODO: Write your first STL formula. You want that the position never exceeds
         #  for the whole future.
-        #self.bounds_check = mtl.parse('')  # Your STL formula here
+        self.bounds_check = mtl.parse('G(min_x & max_x)')  # Your STL formula here
 
         #-----------------------------------
         # Part 2: Position-Based Properties
@@ -150,5 +150,5 @@ trajectory = dbc.get_trajectory()
 cm = CraneMonitor()
 angle_bounds_check =  cm.check_theta_bounds(measurements['angular position'])
 print(f"Angle Bounds: {'✓' if angle_bounds_check else '✗'}")
-#bounds_check_x = cm.check_x_bounds(measurements['position'])
-#print(f"Position Bounds: {'✓' if bounds_check_x else '✗'}")
+bounds_check_x = cm.check_x_bounds(measurements['position'])
+print(f"Position Bounds: {'✓' if bounds_check_x else '✗'}")
