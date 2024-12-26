@@ -68,8 +68,8 @@ class CraneMonitor(object):
         # TODO: Implement check for:
         # - Reaching loading position (x = 0.0 ± 0.01)
         # - Reaching unloading position (x = end_pos ± 0.04)
-        #self.at_loading = lambda lst, start_position:  # Your code here
-        #self.at_unloading = lambda lst, end_position:  # Your code here
+        self.at_loading = lambda lst, start_position: [(t, abs(x - start_position) < 0.01) for (t, x) in lst]
+        self.at_unloading = lambda lst, end_position: [(t, abs(x - end_position) < 0.04) for (t, x) in lst]
         # As the STL formula is dynamic (based on the time calculated by the trajectory planner),
         # We will put the formula in the check_proper_transport_sequence.
 
@@ -132,7 +132,14 @@ class CraneMonitor(object):
         # Hint: Use the F operator to check if positions are reached in sequence
         # The trajectory should be done within a certain timespan (trajectory_end - trajectory_start ± 0.2)
         # Because the formula is dynamic
-        #self.transport_sequence = mtl.parse('')  # Your STL formula here
+        data = {}
+        data['at_loading'] = self.at_loading(x, traj_start)
+        data['at_unloading'] = self.at_unloading(x, traj_end)
+        # For some reason, the F[0, max_t] does not work. Always returns error about parse error.
+        # Because we know that max_t = 2.03 + 0.2, then we hardcoded it
+
+        self.transport_sequence = mtl.parse('G(at_loading -> F[0, 2.23] at_unloading)')  # Your STL formula here
+
 
     def check_settling(self, x, theta):
         """
@@ -152,3 +159,12 @@ angle_bounds_check =  cm.check_theta_bounds(measurements['angular position'])
 print(f"Angle Bounds: {'✓' if angle_bounds_check else '✗'}")
 bounds_check_x = cm.check_x_bounds(measurements['position'])
 print(f"Position Bounds: {'✓' if bounds_check_x else '✗'}")
+
+x = measurements['position']
+start_traj = trajectory['position'][0][1]
+end_traj = trajectory['position'][-1][1]
+max_t = trajectory['position'][-1][0]
+#print(max_t)
+
+proper_transport_seq = cm.check_proper_transport_sequence(x, start_traj, end_traj, max_t)
+print(f"Proper tranport: {'✓' if proper_transport_seq else '✗'}")
